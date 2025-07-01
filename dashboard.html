@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatApp - Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f2f5;
+    }
+
+    .cover-placeholder {
+      width: 100%;
+      height: 200px;
+      background: #dfe3e8;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .cover-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 15px;
+    }
+
+    .upload-text {
+      position: absolute;
+      color: #555;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .profile-frame {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #ccc;
+      overflow: hidden;
+      position: relative;
+      margin: 20px auto 0;
+    }
+
+    .profile-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-placeholder {
+      font-size: 40px;
+      color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+    }
+
+    #changeProfileBtn {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVIGATION BAR -->
+  <nav class="navbar">
+  <button class="nav-btn" id="chatBtn">💬 Chat</button>
+  <button class="nav-btn" id="friendsBtn">👥 Friends</button>
+  <button class="nav-btn" id="notificationsBtn">
+  <span class="icon-wrapper">
+    🔔
+    <span id="notifCount" class="notif-badge">0</span>
+  </span>
+  Notifications
+</button>
+
+  <button class="nav-btn" id="newPostBtn">➕ New Post</button>
+  <button class="nav-btn" id="settingsBtn">⚙️ Settings</button>
+</nav>
+
+<section class="friends-section">
+  <h3>👥 My Friends</h3>
+  <ul id="myFriendsList" class="friends-list"></ul>
+</section>
+
+  <!-- COVER PHOTO -->
+  <div class="cover-container">
+    <div id="coverPhotoWrapper" class="cover-placeholder" onclick="uploadCover.click()">
+      <span class="upload-text">Click to upload cover photo</span>
+      <img id="coverPhoto" class="cover-img" hidden />
+    </div>
+    <input type="file" id="uploadCover" accept="image/*" hidden />
+  </div>
+
+  <!-- PROFILE PICTURE -->
+  <div class="profile-container">
+    <div class="profile-frame" onclick="uploadProfile.click()">
+      <img id="profilePic" class="profile-img" hidden />
+      <span id="profilePlaceholder" class="profile-placeholder">+</span>
+    </div>
+    <input type="file" id="uploadProfile" accept="image/*" hidden />
+    <button id="changeProfileBtn">Change Profile</button>
+  </div>
+
+  <!-- BIO -->
+  <p id="bioText" class="user-bio"></p>
+
+  <!-- PROFILE PIC MODAL -->
+  <div id="profileModal" class="modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="fullProfileView" />
+  </div>
+
+  <!-- POST SECTION -->
+  <div class="dashboard">
+    <h2>Welcome to ChatApp Dashboard</h2>
+
+    <div class="post-form">
+      <textarea id="caption" placeholder="What's on your mind?"></textarea><br />
+      <input type="file" id="mediaUpload" accept="image/*,video/*" /><br />
+      <button onclick="createPost()">Post</button>
+    </div>
+
+    <hr />
+    <div id="postFeed" class="post-feed"></div>
+  </div>
+
+  <script>
+  const profilePic = document.getElementById("profilePic");
+  const coverPhoto = document.getElementById("coverPhoto");
+  const uploadProfile = document.getElementById("uploadProfile");
+  const uploadCover = document.getElementById("uploadCover");
+  const profilePlaceholder = document.getElementById("profilePlaceholder");
+  const coverWrapper = document.getElementById("coverPhotoWrapper");
+  const bioText = document.getElementById("bioText");
+  const myFriendsList = document.getElementById("myFriendsList");
+  const notifCountSpan = document.getElementById("notifCount");
+
+  const loggedInEmail = localStorage.getItem("loggedInUserEmail");
+  const users = JSON.parse(localStorage.getItem("chatUsers")) || [];
+  const currentUser = users.find(u => u.email === loggedInEmail);
+
+  if (!currentUser) {
+    alert("User not found. Please login again.");
+    window.location.href = "login.html";
+  }
+
+  // Ensure arrays exist
+  currentUser.friends = currentUser.friends || [];
+  currentUser.notifications = currentUser.notifications || [];
+
+  // Display profile picture
+  if (currentUser.profilePic) {
+    profilePic.src = currentUser.profilePic;
+    profilePic.hidden = false;
+    profilePlaceholder.style.display = "none";
+  }
+
+  // Display cover photo
+  if (currentUser.coverPhoto) {
+    coverPhoto.src = currentUser.coverPhoto;
+    coverPhoto.hidden = false;
+    coverWrapper.querySelector(".upload-text").style.display = "none";
+  }
+
+  // Display bio
+  if (currentUser.bio) {
+    bioText.textContent = currentUser.bio;
+  }
+
+  // Upload profile photo
+  uploadProfile.onchange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        profilePic.src = reader.result;
+        profilePic.hidden = false;
+        profilePlaceholder.style.display = "none";
+        currentUser.profilePic = reader.result;
+        updateUserData(currentUser);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload cover photo
+  uploadCover.onchange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        coverPhoto.src = reader.result;
+        coverPhoto.hidden = false;
+        coverWrapper.querySelector(".upload-text").style.display = "none";
+        currentUser.coverPhoto = reader.result;
+        updateUserData(currentUser);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Save updated user to localStorage
+  function updateUserData(updatedUser) {
+    const allUsers = JSON.parse(localStorage.getItem("chatUsers")) || [];
+    const index = allUsers.findIndex(u => u.email === updatedUser.email);
+    if (index !== -1) {
+      allUsers[index] = updatedUser;
+      localStorage.setItem("chatUsers", JSON.stringify(allUsers));
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    }
+  }
+
+  // Navigation Buttons
+  document.getElementById("settingsBtn").onclick = () => {
+    window.location.href = "settings.html";
+  };
+
+  document.getElementById("friendsBtn").onclick = () => {
+    window.location.href = "friends.html";
+  };
+
+  document.getElementById("notificationsBtn").onclick = () => {
+    window.location.href = "notifications.html";
+  };
+
+  document.getElementById("newPostBtn").onclick = () => {
+    document.getElementById("caption").focus();
+  };
+document.getElementById("chatBtn").onclick = () => {
+  window.location.href = "chat.html";
+};
+
+  
+
+  // Load My Friends
+  if (myFriendsList && currentUser.friends.length > 0) {
+    currentUser.friends.forEach(friendUsername => {
+      const li = document.createElement("li");
+      li.textContent = friendUsername;
+      myFriendsList.appendChild(li);
+    });
+  } else if (myFriendsList) {
+    myFriendsList.innerHTML = "<li>You have no friends yet.</li>";
+  }
+
+  // Notification Count Badge (with live update)
+  function updateNotificationBadge() {
+    const users = JSON.parse(localStorage.getItem("chatUsers")) || [];
+    const loggedInEmail = localStorage.getItem("loggedInUserEmail");
+    const currentUser = users.find(u => u.email === loggedInEmail);
+
+    if (notifCountSpan && currentUser?.notifications?.length > 0) {
+      notifCountSpan.textContent = currentUser.notifications.length;
+      notifCountSpan.style.display = "inline-block";
+    } else if (notifCountSpan) {
+      notifCountSpan.style.display = "none";
+    }
+  }
+
+  // Initial call
+  updateNotificationBadge();
+
+  // Live update when another tab modifies localStorage
+  window.addEventListener("storage", function (event) {
+    if (event.key === "chatUsers") {
+      updateNotificationBadge();
+    }
+  });
+</script>
+
+
+  <script src="js/dashboard.js">
+    
+  </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat - ChatApp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: white;
+      border-right: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .friend-item {
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-bottom: 5px;
+    }
+
+    .friend-item:hover,
+    .friend-item.active {
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .chat-header {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .chat-box {
+      height: 300px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .message {
+      margin: 5px 0;
+      word-wrap: break-word;
+      max-width: 90%;
+    }
+
+    .me {
+      text-align: right;
+      color: green;
+    }
+
+    .friend {
+      text-align: left;
+      color: blue;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-row input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+    }
+
+    .input-row button {
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .back-btn {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar" id="friendList"></div>
+
+  <div class="chat-area">
+    <!-- 🔒 Chat panel hidden initially -->
+    <div id="chatPanel" style="display: none;">
+      <div class="chat-header">Chatting with: <span id="chatWithName">Select a friend</span></div>
+
+      <div class="chat-box" id="chatBox"></div>
+
+      <div class="input-row">
+        <input type="text" id="messageInput" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+
+      <div class="input-row" style="margin-top: 10px;">
+        <button onclick="addEmoji('😊')">😊</button>
+        <button onclick="addEmoji('❤️')">❤️</button>
+        <input type="file" id="imageUpload" accept="image/*" />
+      </div>
+
+      <div style="margin-top: 15px;">
+        <button onclick="window.location.href='dashboard.html'" class="back-btn">← Back to Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const users = JSON.parse(localStorage.getItem("chatUsers")) || [];
+  const loggedInEmail = localStorage.getItem("loggedInUserEmail");
+  const currentUser = users.find(u => u.email === loggedInEmail);
+
+  const friendList = document.getElementById("friendList");
+  const chatBox = document.getElementById("chatBox");
+  const messageInput = document.getElementById("messageInput");
+  const chatWithName = document.getElementById("chatWithName");
+  const chatPanel = document.getElementById("chatPanel");
+
+  let chatWith = null;
+
+  if (!currentUser) {
+    alert("Not logged in");
+    window.location.href = "login.html";
+  }
+
+  currentUser.friends = currentUser.friends || [];
+
+  function getChatKey(user1, user2) {
+    return [user1, user2].sort().join("_chat_");
+  }
+
+  currentUser.friends.forEach(friend => {
+    const div = document.createElement("div");
+    div.className = "friend-item";
+    div.textContent = friend;
+    div.onclick = () => {
+      document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active'));
+      div.classList.add('active');
+      chatWith = friend;
+      localStorage.setItem("chatWith", chatWith);
+      chatWithName.textContent = chatWith;
+      chatPanel.style.display = "block"; // 👈 Show panel on friend select
+      loadMessages();
+    };
+    friendList.appendChild(div);
+  });
+
+  function loadMessages() {
+    chatBox.innerHTML = "";
+    if (!chatWith) return;
+
+    const chats = JSON.parse(localStorage.getItem("chatMessages")) || {};
+    const key = getChatKey(currentUser.username, chatWith);
+    const messages = chats[key] || [];
+
+    messages.forEach(msg => {
+      const div = document.createElement("div");
+      div.className = "message " + (msg.sender === currentUser.username ? "me" : "friend");
+      div.textContent = `${msg.sender}: ${msg.text} (${msg.time || ''})`;
+
+      if (msg.image) {
+        const img = document.createElement("img");
+        img.src = msg.image;
+        img.style.maxWidth = "100px";
+        img.style.borderRadius = "10px";
+        img.style.display = "block";
+        img.style.margin = "5px 0";
+        div.appendChild(img);
+      }
+
+      chatBox.appendChild(div);
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text || !chatWith) return;
+
+    const chats = JSON.parse(localStorage.getItem("chatMessages")) || {};
+    const key = getChatKey(currentUser.username, chatWith);
+
+    chats[key] = chats[key] || [];
+    chats[key].push({
+      sender: currentUser.username,
+      text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+
+    localStorage.setItem("chatMessages", JSON.stringify(chats));
+    messageInput.value = "";
+    loadMessages();
+  }
+
+  messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  });
+
+  function addEmoji(symbol) {
+    messageInput.value += symbol;
+    messageInput.focus();
+  }
+
+  document.getElementById("imageUpload").onchange = function (e) {
+    const file = e.target.files[0];
+    if (file && chatWith) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const chats = JSON.parse(localStorage.getItem("chatMessages")) || {};
+        const key = getChatKey(currentUser.username, chatWith);
+
+        chats[key] = chats[key] || [];
+        chats[key].push({
+          sender: currentUser.username,
+          text: "[Image]",
+          image: reader.result,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+
+        localStorage.setItem("chatMessages", JSON.stringify(chats));
+        loadMessages();
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+</script>
+
+</body>
+</html>

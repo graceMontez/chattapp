@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Friends - ChatApp</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .back-btn {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .friend-card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .friend-name {
+      font-weight: 600;
+    }
+
+    .add-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="dashboard.html" class="back-btn">⬅ Back to Dashboard</a>
+  </div>
+
+  <h2>Find Friends</h2>
+  <div id="friendsList"></div>
+
+  <script>
+    const users = JSON.parse(localStorage.getItem("chatUsers")) || [];
+    const loggedInEmail = localStorage.getItem("loggedInUserEmail");
+    const currentUserIndex = users.findIndex(u => u.email === loggedInEmail);
+    const currentUser = users[currentUserIndex];
+
+    currentUser.notifications = currentUser.notifications || [];
+    currentUser.friends = currentUser.friends || [];
+
+    const friendsList = document.getElementById("friendsList");
+
+    users.forEach((user, index) => {
+      if (user.email !== loggedInEmail) {
+        users[index].notifications = users[index].notifications || [];
+        users[index].friends = users[index].friends || [];
+
+        const alreadyFriends = currentUser.friends.includes(user.username);
+        const requestSent = user.notifications.includes(currentUser.username);
+        const userRequestedYou = currentUser.notifications.includes(user.username);
+
+        const card = document.createElement("div");
+        card.className = "friend-card";
+
+        const name = document.createElement("div");
+        name.className = "friend-name";
+        name.textContent = user.username;
+
+        const btn = document.createElement("button");
+        btn.className = "add-btn";
+
+        if (alreadyFriends) {
+          btn.textContent = "Already Friends";
+          btn.disabled = true;
+        } else if (requestSent) {
+          btn.textContent = "Cancel Request";
+          btn.style.backgroundColor = "#dc3545";
+          btn.onclick = () => {
+            const notificationIndex = user.notifications.indexOf(currentUser.username);
+            if (notificationIndex !== -1) {
+              user.notifications.splice(notificationIndex, 1);
+              users[index] = user;
+              localStorage.setItem("chatUsers", JSON.stringify(users));
+              alert("Friend request canceled!");
+              location.reload();
+            }
+          };
+        } else if (userRequestedYou) {
+          btn.textContent = "Requested You";
+          btn.disabled = true;
+        } else {
+          btn.textContent = "Add Friend";
+          btn.onclick = () => {
+            user.notifications.push(currentUser.username);
+            users[index] = user;
+            localStorage.setItem("chatUsers", JSON.stringify(users));
+            alert("Friend request sent!");
+            location.reload();
+          };
+        }
+
+        card.appendChild(name);
+        card.appendChild(btn);
+        friendsList.appendChild(card);
+      }
+    });
+
+    localStorage.setItem("chatUsers", JSON.stringify(users));
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    const btn = document.createElement("button");
+btn.className = "add-btn";
+btn.textContent = "Add Friend";
+
+// After the Add Friend button, add Chat button if already friends
+if (currentUser.friends.includes(user.username)) {
+  const chatBtn = document.createElement("button");
+  chatBtn.textContent = "Chat";
+  chatBtn.className = "add-btn";
+  chatBtn.style.backgroundColor = "#007bff";
+  chatBtn.onclick = () => {
+    localStorage.setItem("chatWith", user.username);
+    window.location.href = "chat.html";
+  };
+  card.appendChild(chatBtn);
+}
+
+  </script>
+</body>
+</html>

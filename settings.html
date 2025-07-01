@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings - ChatApp</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f8;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .settings-container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-family: inherit;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .section {
+      margin-top: 40px;
+      text-align: left;
+    }
+
+    .section button {
+      width: auto;
+      margin: 8px 5px 0 0;
+      padding: 10px 20px;
+    }
+
+    .page-nav {
+      margin-top: 30px;
+    }
+
+    .page-nav button {
+      width: auto;
+      margin: 8px 5px;
+      padding: 10px 20px;
+      background-color: #444;
+    }
+
+    .page-nav button:hover {
+      background-color: #222;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="settings-container">
+    <h2>User Settings</h2>
+
+    <input type="text" id="setUsername" placeholder="Change Username" />
+    <input type="email" id="setEmail" placeholder="Change Email" />
+    <input type="password" id="setPassword" placeholder="Change Password" />
+    <textarea id="bioInput" placeholder="Write your bio..." rows="3"></textarea>
+
+    <button onclick="saveSettings()">💾 Save Changes</button>
+
+    <div class="section">
+      <h3>🛠️ Edit Profile</h3>
+      <button onclick="triggerInput('profileInput')">👤 Change Profile Picture</button>
+      <button onclick="triggerInput('coverInput')">🖼️ Change Cover Picture</button>
+      <button onclick="triggerInput('pictureInput')">📸 Add Picture</button>
+      <button onclick="addPost()">📝 Add Post</button>
+    </div>
+
+    <div class="page-nav">
+      <button onclick="goToDashboard()">🏠 Back to Dashboard</button>
+      <button onclick="logout()">🚪 Log Out</button>
+    </div>
+  </div>
+
+  <!-- Hidden Inputs -->
+  <input type="file" id="profileInput" accept="image/*" hidden />
+  <input type="file" id="coverInput" accept="image/*" hidden />
+  <input type="file" id="pictureInput" accept="image/*" hidden />
+
+  <script>
+    function saveSettings() {
+      const users = JSON.parse(localStorage.getItem("chatUsers")) || [];
+      const loggedInEmail = localStorage.getItem("loggedInUserEmail");
+      const index = users.findIndex(u => u.email === loggedInEmail);
+
+      if (index === -1) {
+        alert("User not found.");
+        return window.location.href = "login.html";
+      }
+
+      users[index].username = document.getElementById("setUsername").value || users[index].username;
+      users[index].email = document.getElementById("setEmail").value || users[index].email;
+      users[index].password = document.getElementById("setPassword").value || users[index].password;
+      users[index].bio = document.getElementById("bioInput").value || users[index].bio;
+
+      localStorage.setItem("chatUsers", JSON.stringify(users));
+      localStorage.setItem("chatUser", JSON.stringify(users[index]));
+      localStorage.setItem("loggedInUserEmail", users[index].email); // in case email was changed
+
+      alert("Settings updated successfully!");
+    }
+
+    function triggerInput(id) {
+      document.getElementById(id).click();
+    }
+
+    function addPost() {
+      alert("Redirecting to Dashboard to create a post...");
+      window.location.href = "dashboard.html";
+    }
+
+    function goToDashboard() {
+      window.location.href = "dashboard.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedIn");
+      localStorage.removeItem("loggedInUserEmail");
+      alert("Logged out successfully.");
+      window.location.href = "index.html";
+    }
+
+    document.getElementById("profileInput").onchange = e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          localStorage.setItem("profilePic", reader.result);
+          alert("Profile picture updated!");
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    document.getElementById("coverInput").onchange = e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          localStorage.setItem("coverPhoto", reader.result);
+          alert("Cover photo updated!");
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    document.getElementById("pictureInput").onchange = e => {
+      const file = e.target.files[0];
+      if (file) {
+        alert("New picture added: " + file.name);
+      }
+    };
+  </script>
+
+</body>
+</html>

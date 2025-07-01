@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notifications - ChatApp</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .back-btn {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .notification-card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notification-name {
+      font-weight: 600;
+    }
+
+    .confirm-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .no-requests {
+      text-align: center;
+      color: gray;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="dashboard.html" class="back-btn">⬅ Back to Dashboard</a>
+  </div>
+
+  <h2>Notifications</h2>
+  <div id="notificationsContainer"></div>
+
+<script>
+  const users = JSON.parse(localStorage.getItem("chatUsers")) || [];
+  const loggedInEmail = localStorage.getItem("loggedInUserEmail");
+  const currentUserIndex = users.findIndex(u => u.email === loggedInEmail);
+  const currentUser = users[currentUserIndex];
+  const container = document.getElementById("notificationsContainer");
+
+  // Ensure array exists
+  currentUser.notifications = currentUser.notifications || [];
+  currentUser.friends = currentUser.friends || [];
+
+  if (currentUser.notifications.length === 0) {
+    container.innerHTML = `<p class="no-requests">No friend requests at the moment.</p>`;
+  } else {
+    currentUser.notifications.forEach(senderUsername => {
+      const sender = users.find(u => u.username === senderUsername);
+      if (!sender) return;
+
+      // Ensure sender also has friends array
+      sender.friends = sender.friends || [];
+
+      const card = document.createElement("div");
+      card.className = "notification-card";
+
+      const name = document.createElement("div");
+      name.className = "notification-name";
+      name.textContent = `${sender.username} sent you a friend request`;
+
+      const btn = document.createElement("button");
+      btn.className = "confirm-btn";
+      btn.textContent = "Confirm";
+
+      btn.onclick = () => {
+        // Add each other as friends (by username)
+        if (!currentUser.friends.includes(sender.username)) {
+          currentUser.friends.push(sender.username);
+        }
+        if (!sender.friends.includes(currentUser.username)) {
+          sender.friends.push(currentUser.username);
+        }
+
+        // Remove notification
+        currentUser.notifications = currentUser.notifications.filter(n => n !== sender.username);
+
+        // Save everything
+        users[currentUserIndex] = currentUser;
+        const senderIndex = users.findIndex(u => u.username === sender.username);
+        users[senderIndex] = sender;
+        localStorage.setItem("chatUsers", JSON.stringify(users));
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+        alert("Friend request accepted!");
+        location.reload();
+      };
+
+      card.appendChild(name);
+      card.appendChild(btn);
+      container.appendChild(card);
+    });
+  }
+</script>
+
+
+</body>
+</html>

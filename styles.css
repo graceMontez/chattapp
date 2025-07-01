@@ -1,0 +1,327 @@
+/* ========== [General Styles] ========== */
+body {
+  background: #4586e7;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ========== [Dashboard Layout] ========== */
+.dashboard {
+  width: 90%;
+  max-width: 600px;
+  margin: 30px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* ========== [Post Form] ========== */
+.post-form textarea,
+.post-form input[type="file"] {
+  width: 100%;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+/* ========== [Buttons] ========== */
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  background-color: #0066ff;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 5px;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #004ec2;
+}
+
+.nav-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: #0056b3;
+}
+
+/* ========== [Posts] ========== */
+.post {
+  background: #23e73d;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+}
+
+.post-media {
+  max-width: 90%;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.post-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+/* ========== [Comments & Replies] ========== */
+.comment-block {
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+.reply-list .comment-block {
+  background: #d8e0e3;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* ========== [Profile & Cover Sections] ========== */
+.cover-section,
+.cover-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  height: 180px;
+  overflow: hidden;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.cover-img:hover {
+  opacity: 0.8;
+}
+
+.profile-info,
+.profile-container {
+  position: relative;
+  text-align: center;
+  margin-top: -50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid white;
+  background: #fff;
+  cursor: pointer;
+}
+
+#changeProfileBtn,
+#changeCoverBtn {
+  margin-top: 10px;
+  background-color: #555;
+  font-size: 14px;
+  padding: 6px 12px;
+  color: white;
+  border-radius: 6px;
+}
+
+/* ========== [Modal] ========== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  padding-top: 60px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+  margin: auto;
+  display: block;
+  max-width: 90%;
+  max-height: 80%;
+  border-radius: 10px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 30px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ========== [Navbar] ========== */
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 10px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-radius: 0 0 10px 10px;
+}
+
+.navbar a.nav-btn {
+  text-decoration: none;
+  text-align: center;
+}
+
+/* ========== [Bio] ========== */
+.user-bio {
+  font-size: 14px;
+  color: #444;
+  text-align: center;
+  margin-top: 8px;
+}
+
+
+.cover-placeholder {
+  width: 100%;
+  height: 180px;
+  background: #e0e0e0;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+}
+
+.cover-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px 12px 0 0;
+  display: block;
+}
+
+.profile-frame {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.profile-placeholder {
+  width: 100px;
+  height: 100px;
+  background: #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: #777;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.profile-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid white;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+.friends-section {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+.friends-section h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.friends-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.friends-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-weight: 500;
+  color: #444;
+}
+
+
+.notif-badge {
+  background: rgb(27, 14, 14);
+  color: white;
+  font-size: 10px;
+  font-family: 'Inter', system-ui, sans-serif;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 5px;
+}
+
+.icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background-color: red;
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 50%;
+  font-weight: bold;
+  min-width: 16px;
+  height: 16px;
+  text-align: center;
+  line-height: 12px;
+  display: none;
+}
+
